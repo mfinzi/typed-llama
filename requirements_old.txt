@@ -1,0 +1,9 @@
+huggingface-hub
+trl
+transformers
+accelerate
+peft
+datasets
+bitsandbytes
+einops
+wandb
