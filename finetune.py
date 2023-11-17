@@ -6,7 +6,7 @@ import os
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, AutoPeftModelForCausalLM
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed, Trainer, TrainingArguments, BitsAndBytesConfig, \
-    DataCollatorForLanguageModeling, Trainer, TrainingArguments
+    DataCollatorForLanguageModeling, Trainer, TrainingArguments, DataCollatorForSeq2Seq
 from datasets import load_dataset
 
 
@@ -147,6 +147,13 @@ def create_peft_config(modules):
 
     return config
 
+class MyCollator(DataCollatorForLanguageModeling):
+    def torch_call(self, examples):
+        print(examples[0])
+        out = super().torch_call(examples)
+        print(out)
+        assert False
+        return out
 
 
 def find_all_linear_names(model):
@@ -233,7 +240,7 @@ def train(model, tokenizer, dataset, output_dir):
             output_dir="outputs",
             optim="paged_adamw_8bit",
         ),
-        data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False)
+        data_collator=MyCollator(tokenizer, mlm=False)
     )
     
     model.config.use_cache = False  # re-enable for inference to speed up predictions for similar inputs
